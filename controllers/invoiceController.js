@@ -41,3 +41,15 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
     invoice,
   });
 });
+
+export const getAllInvoices = asyncErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const invoices = await Invoice.find({ user: userId });
+
+  res.status(200).send({
+    success: true,
+    count: invoices.length,
+    invoices,
+  });
+});
