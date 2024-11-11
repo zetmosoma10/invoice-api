@@ -67,3 +67,16 @@ export const getInvoice = asyncErrorHandler(async (req, res, next) => {
     invoice,
   });
 });
+
+export const deleteInvoice = asyncErrorHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const invoice = await Invoice.findByIdAndDelete(id);
+  if (!invoice) {
+    return next(new CustomError("Invoice already deleted", 400));
+  }
+
+  res.status(200).send({
+    success: true,
+  });
+});
