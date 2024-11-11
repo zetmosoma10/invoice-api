@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import globalErrorMiddleware from "./middlewares/globalErrorMiddleware.js";
+import catchAllRoutes from "./middlewares/catchAllRoutes.js";
 import userRouter from "./routes/userRouter.js";
 import authRouter from "./routes/authRouter.js";
 
@@ -14,6 +15,7 @@ if (process.env.NODE_ENV === "development") {
 }
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
+app.use("*", catchAllRoutes);
 app.use(globalErrorMiddleware);
 
 export default app;
