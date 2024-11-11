@@ -53,3 +53,17 @@ export const getAllInvoices = asyncErrorHandler(async (req, res, next) => {
     invoices,
   });
 });
+
+export const getInvoice = asyncErrorHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const invoice = await Invoice.findById(id);
+  if (!invoice) {
+    return next(new CustomError("Invoice for given id doest not exist", 404));
+  }
+
+  res.status(200).send({
+    success: true,
+    invoice,
+  });
+});
