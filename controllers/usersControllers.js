@@ -12,3 +12,5 @@ export const register = asyncErrorHandler(async (req, res) => {
     token,
   });
 });
+
+export const getCurrentUser = async (req, res, next) => {};
