@@ -7,7 +7,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-if (process.env === "development") {
+if (process.env.NODE_ENV === "development") {
   console.log(morgan("dev"));
 }
 app.use("/api/user", userRouter);

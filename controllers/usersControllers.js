@@ -4,9 +4,10 @@ export const register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
   const user = await User.create({ firstName, lastName, email, password });
+  const token = user.generateJwt();
 
   res.status(201).send({
     success: true,
-    user,
+    token,
   });
 };
