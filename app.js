@@ -1,8 +1,8 @@
 import express from "express";
-import testRouter from "./routes/testRoute.js";
+import userRouter from "./routes/userRouter.js";
 
 const app = express();
 
-app.use("/", testRouter);
+app.use("/", userRouter);
 
 export default app;
