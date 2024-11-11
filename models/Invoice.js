@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const addressSchema = new mongoose.Schema({
-  streetAdress: { type: String, required: true },
+  street: { type: String, required: true },
   city: { type: String, required: true },
   postalCode: { type: String, required: true },
   country: { type: String, required: true },
@@ -15,17 +15,19 @@ const itemSchema = new mongoose.Schema({
 
 const invoiceSchema = new mongoose.Schema({
   user: {
-    type: mongoose.Types.ObjectId(),
+    type: mongoose.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  BillFrom: {
+  billFrom: {
     address: {
       type: addressSchema,
       required: true,
     },
   },
-  BillTo: {
+  billTo: {
+    clientName: { type: String, required: true, minLength: 3, maxLength: 50 },
+    clientEmail: { type: String, required: true, trim: true, lowercase: true },
     address: {
       type: addressSchema,
       required: true,
@@ -36,7 +38,12 @@ const invoiceSchema = new mongoose.Schema({
       enum: ["Next 1 day", "Next 7 days", "Next 14 days", "Next 30 days"],
       required: true,
     },
-    projectDescription: { type: String, required: true },
+    projectDescription: {
+      type: String,
+      required: true,
+      minLength: 5,
+      maxLength: 150,
+    },
     items: [itemSchema],
   },
 });
