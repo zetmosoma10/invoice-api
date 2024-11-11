@@ -1,5 +1,5 @@
 import CustomError from "../utils/CustomError.js";
-process.env.NODE_ENV = "production";
+// process.env.NODE_ENV = "production";
 
 const developmentErrors = (err, res) => {
   res.status(err.statusCode).send({
