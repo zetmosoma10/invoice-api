@@ -1,5 +1,5 @@
-const sayHello = () => {
-  console.log("Hello World");
-};
+import express from "express";
 
-sayHello();
+const app = express();
+
+export default app;
