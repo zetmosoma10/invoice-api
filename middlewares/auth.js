@@ -9,7 +9,9 @@ const auth = asyncErrorHandler(async (req, res, next) => {
 
   // * check if token exist
   if (!token) {
-    return next(new CustomError("Authentication token missing.", 401));
+    return next(
+      new CustomError("Authentication token missing. Please login", 401)
+    );
   }
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET_STR);

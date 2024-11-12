@@ -38,7 +38,7 @@ describe("/api/auth/login", () => {
 
   it("should return 401 if invalid email provided", async () => {
     const res = await request(server).post("/api/auth/login").send({
-      email: "z@.com",
+      email: "invalid@.com",
       password: "123456",
     });
 
@@ -50,7 +50,7 @@ describe("/api/auth/login", () => {
   it("should return 401 if invalid password provided", async () => {
     const res = await request(server).post("/api/auth/login").send({
       email: "z@z.com",
-      password: "A",
+      password: "invalid",
     });
 
     expect(res.status).toBe(401);

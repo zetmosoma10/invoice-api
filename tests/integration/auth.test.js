@@ -36,9 +36,11 @@ describe("Authentication", () => {
     expect(res.body.message).toMatch(/Authentication token missing/i);
   });
 
-  it("should return 401 if token provided but user associated with token does not exist", async () => {
+  it("should return 401 if user associated with token does not exist", async () => {
     const token = user.generateJwt();
     await User.deleteMany({});
+    console.log(token);
+    console.log(user);
 
     const res = await request(server)
       .get("/api/user/me")
