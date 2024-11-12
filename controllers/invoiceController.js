@@ -68,6 +68,79 @@ export const getInvoice = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+export const updateInvoice = asyncErrorHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const updateData = req.body;
+  const userId = req.user._id;
+
+  const currentInvoice = await Invoice.findOne({ _id: id, user: userId });
+  if (!currentInvoice) {
+    return next(new CustomError("Invoice not found", 404));
+  }
+
+  const invoice = await Invoice.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        billFrom: {
+          address: {
+            street:
+              updateData.billFrom?.address?.street ||
+              currentInvoice.billFrom.address.street,
+            city:
+              updateData.billFrom?.address?.city ||
+              currentInvoice.billFrom.address.city,
+            postalCode:
+              updateData.billFrom?.address?.postalCode ||
+              currentInvoice.billFrom.address.postalCode,
+            country:
+              updateData.billFrom?.address?.country ||
+              currentInvoice.billFrom.address.country,
+          },
+        },
+        billTo: {
+          clientName:
+            updateData.billTo?.clientName || currentInvoice.billTo.clientName,
+          clientEmail:
+            updateData.billTo?.clientEmail || currentInvoice.billTo.clientEmail,
+          address: {
+            street:
+              updateData.billTo?.address?.street ||
+              currentInvoice.billTo.address.street,
+            city:
+              updateData.billTo?.address?.city ||
+              currentInvoice.billTo.address.city,
+            postalCode:
+              updateData.billTo?.address?.postalCode ||
+              currentInvoice.billTo.address.postalCode,
+            country:
+              updateData.billTo?.address?.country ||
+              currentInvoice.billTo.address.country,
+          },
+          invoiceDate:
+            updateData.billTo?.invoiceDate || currentInvoice.billTo.invoiceDate,
+          paymentTerms:
+            updateData.billTo?.paymentTerms ||
+            currentInvoice.billTo.paymentTerms,
+          projectDescription:
+            updateData.billTo?.projectDescription ||
+            currentInvoice.billTo.projectDescription,
+          items: updateData.billTo?.items || currentInvoice.billTo.items,
+        },
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).send({
+    success: true,
+    invoice,
+  });
+});
+
 export const deleteInvoice = asyncErrorHandler(async (req, res, next) => {
   const { id } = req.params;
 
