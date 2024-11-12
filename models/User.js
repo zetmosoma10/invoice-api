@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import joi from "joi";
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -50,6 +51,22 @@ userSchema.methods.generateJwt = function () {
   );
 };
 
+const validateUser = (data) => {
+  const schema = joi.object({
+    firstName: joi.string().min(3).max(50).required(),
+    lastName: joi.string().min(3).max(50).required(),
+    email: joi.string().email().required(),
+    password: joi.string().min(4).max(150).required(),
+  });
+
+  const { error } = schema.validate(data);
+  if (error) {
+    return error.details[0].message;
+  } else {
+    return null;
+  }
+};
+
 const User = mongoose.model("User", userSchema);
 
-export { User };
+export { User, validateUser };
