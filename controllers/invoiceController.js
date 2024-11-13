@@ -49,12 +49,34 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
 
 export const getAllInvoices = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
+  const { page = 1, limit = 3 } = req.query;
 
-  const invoices = await Invoice.find({ user: userId });
+  const pageNumber = Math.max(Number(page), 1);
+  const pageLimit = Math.max(Number(limit), 1);
+  const skip = (pageNumber - 1) * pageLimit;
+
+  const totalInvoices = await Invoice.countDocuments({ user: userId });
+  const totalPages = Math.ceil(totalInvoices / pageLimit);
+
+  if (pageNumber > totalPages) {
+    return next(
+      new CustomError(
+        `Page ${pageNumber} does not exist. There are only ${totalPages} page(s) available.`,
+        404
+      )
+    );
+  }
+
+  const invoices = await Invoice.find({ user: userId })
+    .skip(skip)
+    .limit(pageLimit);
 
   res.status(200).send({
     success: true,
-    count: invoices.length,
+    currentPage: pageNumber,
+    totalInvoicesPerPage: invoices.length,
+    totalInvoices,
+    totalPages,
     invoices,
   });
 });
