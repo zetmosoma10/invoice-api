@@ -56,16 +56,32 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
 
 export const getAllInvoices = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const { page = 1, limit = 6 } = req.query;
+  const { page = 1, limit = 6, status } = req.query;
 
   const pageNumber = Math.max(Number(page), 1);
   const pageLimit = Math.max(Number(limit), 1);
   const skip = (pageNumber - 1) * pageLimit;
 
-  const totalInvoices = await Invoice.countDocuments({ user: userId });
+  const query = { user: userId };
+
+  if (status) {
+    if (!["Draft", "Pending", "Paid"].includes(status)) {
+      return next(
+        new CustomError(
+          "Invalid status value. Must be 'Draft', 'Pending', or 'Paid'.",
+          400
+        )
+      );
+    }
+
+    // * Attach status query to query object
+    query.status = status;
+  }
+
+  const totalInvoices = await Invoice.countDocuments(query);
   const totalPages = Math.ceil(totalInvoices / pageLimit);
 
-  if (pageNumber > totalPages) {
+  if (pageNumber > totalPages && totalPages > 0) {
     return next(
       new CustomError(
         `Page ${pageNumber} does not exist. There are only ${totalPages} page(s) available.`,
@@ -74,9 +90,7 @@ export const getAllInvoices = asyncErrorHandler(async (req, res, next) => {
     );
   }
 
-  const invoices = await Invoice.find({ user: userId })
-    .skip(skip)
-    .limit(pageLimit);
+  const invoices = await Invoice.find(query).skip(skip).limit(pageLimit);
 
   res.status(200).send({
     success: true,
