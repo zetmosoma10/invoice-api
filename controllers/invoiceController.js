@@ -10,10 +10,17 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError(err, 400));
   }
 
-  const { billFrom, billTo } = req.body;
+  const { billFrom, billTo, status } = req.body;
+
+  if (!["Draft", "Pending"].includes(status)) {
+    return next(
+      new CustomError("Status must be 'draft' or 'pending' at creation", 400)
+    );
+  }
 
   const invoice = await Invoice.create({
     user: user._id,
+    status: status,
     billFrom: {
       address: {
         street: billFrom.address.street,
@@ -49,7 +56,7 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
 
 export const getAllInvoices = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const { page = 1, limit = 3 } = req.query;
+  const { page = 1, limit = 6 } = req.query;
 
   const pageNumber = Math.max(Number(page), 1);
   const pageLimit = Math.max(Number(limit), 1);
@@ -187,5 +194,25 @@ export const deleteInvoice = asyncErrorHandler(async (req, res, next) => {
 
   res.status(200).send({
     success: true,
+  });
+});
+
+export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  const invoice = await Invoice.findByIdAndUpdate(
+    { _id: id, user: userId },
+    { status: "Paid" },
+    { new: true }
+  );
+
+  if (!invoice) {
+    return next(new CustomError("Invoice not found", 404));
+  }
+
+  res.status(200).send({
+    success: true,
+    invoice,
   });
 });

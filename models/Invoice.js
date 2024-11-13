@@ -28,6 +28,11 @@ const invoiceSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  status: {
+    type: String,
+    enum: ["Draft", "Pending", "Paid"],
+    required: true,
+  },
   billFrom: {
     address: {
       type: addressSchema,
@@ -90,7 +95,11 @@ const validateInvoice = (data) => {
     }),
   });
 
-  const invoiceSchema = joi.object({
+  const invoiceJoiSchema = joi.object({
+    status: joi.string().valid("Draft", "Pending", "Paid").required().messages({
+      "any.only": "Status terms must be one of: 'Draft', 'Pending', or 'Paid'.",
+      "any.required": "Status terms are required.",
+    }),
     billFrom: joi
       .object({
         address: addressSchema.required(),
@@ -136,7 +145,7 @@ const validateInvoice = (data) => {
       .required(),
   });
 
-  const { error } = invoiceSchema.validate(data);
+  const { error } = invoiceJoiSchema.validate(data);
   if (error) {
     return error.details[0].message;
   } else {
