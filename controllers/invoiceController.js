@@ -1,9 +1,14 @@
-import { Invoice } from "../models/Invoice.js";
+import { Invoice, validateInvoice } from "../models/Invoice.js";
 import asyncErrorHandler from "../utils/asyncErrorHandler.js";
 import CustomError from "../utils/CustomError.js";
 
 export const createInvoice = asyncErrorHandler(async (req, res, next) => {
   const user = req.user;
+
+  const err = validateInvoice(req.body);
+  if (err) {
+    return next(new CustomError(err, 400));
+  }
 
   const { billFrom, billTo } = req.body;
 
@@ -70,14 +75,23 @@ export const getInvoice = asyncErrorHandler(async (req, res, next) => {
 
 export const updateInvoice = asyncErrorHandler(async (req, res, next) => {
   const { id } = req.params;
-  const updateData = req.body;
   const userId = req.user._id;
 
+  // * Check if invoice exist in database
   const currentInvoice = await Invoice.findOne({ _id: id, user: userId });
   if (!currentInvoice) {
     return next(new CustomError("Invoice not found", 404));
   }
 
+  const updateData = req.body;
+
+  // * validate incoming data with joi
+  const err = validateInvoice(req.body);
+  if (err) {
+    return next(new CustomError(err, 400));
+  }
+
+  // * update the invoice
   const invoice = await Invoice.findByIdAndUpdate(
     id,
     {
