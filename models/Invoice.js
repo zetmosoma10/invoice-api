@@ -22,45 +22,53 @@ const itemSchema = new mongoose.Schema({
   price: { type: Number, required: true, min: 0.01 },
 });
 
-const invoiceSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["Draft", "Pending", "Paid"],
-    required: true,
-  },
-  billFrom: {
-    address: {
-      type: addressSchema,
+const invoiceSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
       required: true,
     },
-  },
-  billTo: {
-    clientName: { type: String, required: true, minLength: 3, maxLength: 50 },
-    clientEmail: { type: String, required: true, trim: true, lowercase: true },
-    address: {
-      type: addressSchema,
-      required: true,
-    },
-    invoiceDate: { type: Date, default: Date.now },
-    paymentTerms: {
+    status: {
       type: String,
-      enum: ["Next 1 day", "Next 7 days", "Next 14 days", "Next 30 days"],
+      enum: ["Draft", "Pending", "Paid"],
       required: true,
     },
-    projectDescription: {
-      type: String,
-      required: true,
-      minLength: 5,
-      maxLength: 150,
+    billFrom: {
+      address: {
+        type: addressSchema,
+        required: true,
+      },
     },
-    items: [itemSchema],
+    billTo: {
+      clientName: { type: String, required: true, minLength: 3, maxLength: 50 },
+      clientEmail: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+      },
+      address: {
+        type: addressSchema,
+        required: true,
+      },
+      invoiceDate: { type: Date, default: Date.now },
+      paymentTerms: {
+        type: String,
+        enum: ["Next 1 day", "Next 7 days", "Next 14 days", "Next 30 days"],
+        required: true,
+      },
+      projectDescription: {
+        type: String,
+        required: true,
+        minLength: 5,
+        maxLength: 150,
+      },
+      items: [itemSchema],
+    },
   },
-});
+  { toJSON: { virtuals: true }, toObject: { virtuals: true } }
+);
 
 const validateInvoice = (data) => {
   const addressSchema = joi.object({
@@ -152,6 +160,13 @@ const validateInvoice = (data) => {
     return null;
   }
 };
+
+invoiceSchema.virtual("amountDue").get(function () {
+  return this.billTo.items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+});
 
 const Invoice = mongoose.model("Invoice", invoiceSchema);
 

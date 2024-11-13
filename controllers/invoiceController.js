@@ -2,6 +2,8 @@ import { Invoice, validateInvoice } from "../models/Invoice.js";
 import asyncErrorHandler from "../utils/asyncErrorHandler.js";
 import CustomError from "../utils/CustomError.js";
 import sendEmail from "../utils/email.js";
+import generateInvoiceContent from "../utils/generateInvoiceContent.js";
+import generatePaidInvoiceContent from "../utils/generatePaidInvoiceContent.js";
 
 export const createInvoice = asyncErrorHandler(async (req, res, next) => {
   const user = req.user;
@@ -59,7 +61,7 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
       htmlContent: generateInvoiceContent(
         invoice.billTo.clientName,
         invoiceNumber,
-        "5700"
+        invoice.amountDue
       ),
     });
   } catch (error) {
@@ -254,7 +256,7 @@ export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
       htmlContent: generatePaidInvoiceContent(
         invoice.billTo.clientName,
         invoiceNumber,
-        "5700"
+        invoice.amountDue
       ),
     });
   } catch (error) {
@@ -267,37 +269,3 @@ export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
     invoice,
   });
 });
-
-function generatePaidInvoiceContent(clientName, invoiceNumber, amoutDue) {
-  return `
-  <html>
-    <body style="font-family: Arial, sans-serif; color: #333;">
-      <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-        <h2 style="color: #4CAF50;">Hello ${clientName},</h2>
-        <p>We’re delighted to inform you that your recent invoice payment has been received.</p>
-        <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
-        <p><strong>Amount Paid:</strong> R${amoutDue}</p>
-        <p>Your account balance is now updated. Thank you for your prompt payment and for trusting us with your business.</p>
-        <p>Best regards,<br>Web DevSolution</p>
-      </div>
-    </body>
-  </html>
-        `;
-}
-
-function generateInvoiceContent(clientName, invoiceNumber, amoutDue) {
-  return `
-  <html>
-    <body style="font-family: Arial, sans-serif; color: #333;">
-      <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-        <h2 style="color: #4CAF50;">Hello ${clientName},</h2>
-        <p>We’re pleased to let you know that your invoice has been successfully created.</p>
-        <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
-        <p><strong>Amount Due:</strong> R${amoutDue}</p>
-        <p>To view your invoice, click the button below:</p>
-        <a href="#" style="padding: 10px 20px; background-color: #4CAF50; color: #fff; text-decoration: none; border-radius: 5px;">View Invoice</a> 
-      </div>
-    </body>
-  </html>
-        `;
-}
