@@ -5,6 +5,7 @@ import CustomError from "../utils/CustomError.js";
 import sendEmail from "../utils/email.js";
 import generateInvoiceContent from "../utils/generateInvoiceContent.js";
 import generatePaidInvoiceContent from "../utils/generatePaidInvoiceContent.js";
+import generateReminderInvoiceContent from "../utils/generateReminderInvoiceContent.js";
 
 export const createInvoice = asyncErrorHandler(async (req, res, next) => {
   const user = req.user;
@@ -274,5 +275,48 @@ export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
   res.status(200).send({
     success: true,
     invoice,
+  });
+});
+
+export const sendReminder = asyncErrorHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  const invoice = await Invoice.findOne({ _id: id, user: userId });
+
+  if (!invoice) {
+    return next(new CustomError("Invoice not found", 404));
+  }
+
+  if (invoice.status === "Paid") {
+    return next(
+      new CustomError(
+        "Invoice is Paid. Cannot send a reminder to a Paid invoice",
+        400
+      )
+    );
+  }
+
+  const invoiceId = invoice._id.toString();
+  const invoiceNumber = "#" + invoiceId.slice(-4);
+
+  try {
+    await sendEmail({
+      clientEmail: invoice.billTo.clientEmail,
+      subject: `Invoice Reminder: Invoice ${invoiceNumber} Due Soon`,
+      htmlContent: generateReminderInvoiceContent(
+        invoice.billTo.clientName,
+        invoiceNumber,
+        invoice.amountDue,
+        invoice.paymentDue
+      ),
+    });
+  } catch (error) {
+    console.log("Error happend while sending email");
+    console.log(error);
+  }
+
+  res.status(200).send({
+    success: true,
   });
 });

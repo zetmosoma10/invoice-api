@@ -5,6 +5,7 @@ import {
   getAllInvoices,
   getInvoice,
   markAsPaid,
+  sendReminder,
   updateInvoice,
 } from "../controllers/invoiceController.js";
 import auth from "./../middlewares/auth.js";
@@ -19,5 +20,6 @@ router
   .patch(validateObjectId, auth, updateInvoice)
   .delete(validateObjectId, auth, deleteInvoice);
 router.route("/:id/markAsPaid").patch(validateObjectId, auth, markAsPaid);
+router.route("/:id/reminder").post(validateObjectId, auth, sendReminder);
 
 export default router;
