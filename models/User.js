@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     minLength: 4,
   },
+  profilePicUrl: String,
 });
 
 userSchema.pre("save", async function (next) {
@@ -57,6 +58,7 @@ const validateUser = (data) => {
     lastName: joi.string().min(3).max(50).required(),
     email: joi.string().email().required(),
     password: joi.string().min(4).max(150).required(),
+    profilePicUrl: joi.string(),
   });
 
   const { error } = schema.validate(data);
