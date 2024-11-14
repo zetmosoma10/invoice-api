@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { Invoice, validateInvoice } from "../models/Invoice.js";
 import asyncErrorHandler from "../utils/asyncErrorHandler.js";
 import CustomError from "../utils/CustomError.js";
@@ -61,7 +62,8 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
       htmlContent: generateInvoiceContent(
         invoice.billTo.clientName,
         invoiceNumber,
-        invoice.amountDue
+        invoice.amountDue,
+        invoice.paymentDue
       ),
     });
   } catch (error) {
@@ -246,8 +248,12 @@ export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError("Invoice not found", 404));
   }
 
+  invoice.paidAt = Date.now();
+  await invoice.save();
+
   const invoiceId = invoice._id.toString();
   const invoiceNumber = "#" + invoiceId.slice(-4);
+  const paidAt = dayjs(invoice.paidAt).format("DD MMM, YYYY");
 
   try {
     await sendEmail({
@@ -256,7 +262,8 @@ export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
       htmlContent: generatePaidInvoiceContent(
         invoice.billTo.clientName,
         invoiceNumber,
-        invoice.amountDue
+        invoice.amountDue,
+        paidAt
       ),
     });
   } catch (error) {

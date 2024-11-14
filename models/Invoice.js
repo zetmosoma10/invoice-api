@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import joi from "joi";
+import dayjs from "dayjs";
 
 const addressSchema = new mongoose.Schema({
   street: { type: String, required: true },
@@ -53,6 +54,7 @@ const invoiceSchema = new mongoose.Schema(
         required: true,
       },
       invoiceDate: { type: Date, default: Date.now },
+      paidAt: Date,
       paymentTerms: {
         type: String,
         enum: ["Next 1 day", "Next 7 days", "Next 14 days", "Next 30 days"],
@@ -130,6 +132,7 @@ const validateInvoice = (data) => {
         invoiceDate: joi.date().default(Date.now).messages({
           "date.base": "Invoice date must be a valid date.",
         }),
+        paidAt: joi.date(),
         projectDescription: joi.string().min(5).max(150).required().messages({
           "string.empty": "Project description is required.",
           "string.min": "Project description must be at least 5 characters.",
@@ -166,6 +169,28 @@ invoiceSchema.virtual("amountDue").get(function () {
     (total, item) => total + item.price * item.quantity,
     0
   );
+});
+
+invoiceSchema.virtual("paymentDue").get(function () {
+  if (this.billTo.paymentTerms === "Next 1 day") {
+    const paymentDue = dayjs(this.billTo.invoiceDate).add(1, "day");
+    return dayjs(paymentDue).format("DD MMM, YYYY");
+  }
+
+  if (this.billTo.paymentTerms === "Next 7 days") {
+    const paymentDue = dayjs(this.billTo.invoiceDate).add(7, "days");
+    return dayjs(paymentDue).format("DD MMM, YYYY");
+  }
+
+  if (this.billTo.paymentTerms === "Next 14 days") {
+    const paymentDue = dayjs(this.billTo.invoiceDate).add(14, "days");
+    return dayjs(paymentDue).format("DD MMM, YYYY");
+  }
+
+  if (this.billTo.paymentTerms === "Next 30 days") {
+    const paymentDue = dayjs(this.billTo.invoiceDate).add(1, "month");
+    return dayjs(paymentDue).format("DD MMM, YYYY");
+  }
 });
 
 const Invoice = mongoose.model("Invoice", invoiceSchema);

@@ -1,4 +1,9 @@
-function generatePaidInvoiceContent(clientName, invoiceNumber, amoutDue) {
+function generatePaidInvoiceContent(
+  clientName,
+  invoiceNumber,
+  amoutDue,
+  paidAt
+) {
   return `
   <html>
     <body style="font-family: Arial, sans-serif; color: #333;">
@@ -7,6 +12,7 @@ function generatePaidInvoiceContent(clientName, invoiceNumber, amoutDue) {
         <p>We’re delighted to inform you that your recent invoice payment has been received.</p>
         <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
         <p><strong>Amount Paid:</strong> R${amoutDue}</p>
+        <p><strong>Date Paid:</strong> ${paidAt}</p>
         <p>Your account balance is now updated. Thank you for your prompt payment and for trusting us with your business.</p>
         <p>Best regards,<br>Web DevSolution</p>
       </div>

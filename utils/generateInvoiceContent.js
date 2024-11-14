@@ -1,4 +1,9 @@
-function generateInvoiceContent(clientName, invoiceNumber, amoutDue) {
+function generateInvoiceContent(
+  clientName,
+  invoiceNumber,
+  amoutDue,
+  paymentDue
+) {
   return `
   <html>
     <body style="font-family: Arial, sans-serif; color: #333;">
@@ -7,6 +12,7 @@ function generateInvoiceContent(clientName, invoiceNumber, amoutDue) {
         <p>We’re pleased to let you know that your invoice has been successfully created.</p>
         <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
         <p><strong>Amount Due:</strong> R${amoutDue}</p>
+        <p><strong>Payment Due:</strong> ${paymentDue}</p>
         <p>To view your invoice, click the button below:</p>
         <a href="#" style="padding: 10px 20px; background-color: #4CAF50; color: #fff; text-decoration: none; border-radius: 5px;">View Invoice</a> 
       </div>

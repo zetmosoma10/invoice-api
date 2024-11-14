@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import morgan from "morgan";
 import globalErrorMiddleware from "./middlewares/globalErrorMiddleware.js";
 import catchAllRoutes from "./middlewares/catchAllRoutes.js";
 import userRouter from "./routes/userRouter.js";
@@ -11,9 +10,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
 app.use("/api/user", userRouter);
 app.use("/api/invoices", invoiceRouter);
 app.use("/api/auth", authRouter);
