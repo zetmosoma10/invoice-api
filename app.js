@@ -1,5 +1,10 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import xss from "xss-clean";
+import compression from "compression";
+import rateLimit from "express-rate-limit";
+import sanitize from "express-mongo-sanitize";
 import globalErrorMiddleware from "./middlewares/globalErrorMiddleware.js";
 import catchAllRoutes from "./middlewares/catchAllRoutes.js";
 import userRouter from "./routes/userRouter.js";
@@ -8,8 +13,20 @@ import invoiceRouter from "./routes/invoiceRouter.js";
 
 const app = express();
 
-app.use(cors());
+const limiter = rateLimit({
+  limit: 1000,
+  windowMs: 60 * 60 * 1000,
+  message:
+    "We have receive too many request from this IP Address. Please try again in one hour.",
+});
+
+app.use(helmet());
 app.use(express.json());
+app.use(sanitize());
+app.use(xss());
+app.use("/api", limiter);
+app.use(cors());
+app.use(compression());
 app.use("/api/user", userRouter);
 app.use("/api/invoices", invoiceRouter);
 app.use("/api/auth", authRouter);

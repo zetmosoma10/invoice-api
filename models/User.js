@@ -28,7 +28,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     minLength: 4,
   },
-  profilePicUrl: String,
+  profilePicUrl: {
+    type: String,
+    default: null,
+  },
   profilePicId: String,
 });
 
