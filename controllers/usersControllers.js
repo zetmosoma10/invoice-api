@@ -45,6 +45,7 @@ export const getCurrentUser = asyncErrorHandler(async (req, res, next) => {
 export const uploadImage = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   const file = req.file;
+
   if (!file) {
     return next(new CustomError("No image file uploaded", 400));
   }
@@ -55,17 +56,13 @@ export const uploadImage = asyncErrorHandler(async (req, res, next) => {
       resource_type: "auto",
     });
 
-    const user = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
       userId,
       {
         profilePicUrl: result.secure_url,
       },
       { new: true }
     );
-
-    if (!user) {
-      return next(new CustomError("User not found", 404));
-    }
 
     res.status(200).send({
       success: true,

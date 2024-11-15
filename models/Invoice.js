@@ -171,6 +171,11 @@ invoiceSchema.virtual("amountDue").get(function () {
   );
 });
 
+invoiceSchema.virtual("invoiceNumber").get(function () {
+  const invoiceId = this._id.toString();
+  return `#${invoiceId.slice(-4)}`;
+});
+
 invoiceSchema.virtual("paymentDue").get(function () {
   if (this.billTo.paymentTerms === "Next 1 day") {
     const paymentDue = dayjs(this.billTo.invoiceDate).add(1, "day");

@@ -1,11 +1,10 @@
-import dayjs from "dayjs";
 import { Invoice, validateInvoice } from "../models/Invoice.js";
 import asyncErrorHandler from "../utils/asyncErrorHandler.js";
 import CustomError from "../utils/CustomError.js";
-import sendEmail from "../utils/email.js";
-import generateInvoiceContent from "../utils/generateInvoiceContent.js";
-import generatePaidInvoiceContent from "../utils/generatePaidInvoiceContent.js";
-import generateReminderInvoiceContent from "../utils/generateReminderInvoiceContent.js";
+import sendEmail from "../email/email.js";
+import reminderTemplate from "./../email/reminderTemplate.js";
+import paidTemplate from "./../email/paidTemplate.js";
+import template from "./../email/template.js";
 
 export const createInvoice = asyncErrorHandler(async (req, res, next) => {
   const user = req.user;
@@ -53,19 +52,11 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
     },
   });
 
-  const invoiceId = invoice._id.toString();
-  const invoiceNumber = "#" + invoiceId.slice(-4);
-
   try {
     await sendEmail({
       clientEmail: invoice.billTo.clientEmail,
       subject: "Your Invoice is Created",
-      htmlContent: generateInvoiceContent(
-        invoice.billTo.clientName,
-        invoiceNumber,
-        invoice.amountDue,
-        invoice.paymentDue
-      ),
+      htmlContent: template(invoice),
     });
   } catch (error) {
     console.log("Error happend while sending email");
@@ -252,24 +243,18 @@ export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
   invoice.paidAt = Date.now();
   await invoice.save();
 
-  const invoiceId = invoice._id.toString();
-  const invoiceNumber = "#" + invoiceId.slice(-4);
-  const paidAt = dayjs(invoice.paidAt).format("DD MMM, YYYY");
-
   try {
     await sendEmail({
       clientEmail: invoice.billTo.clientEmail,
       subject: "Your Invoice is Paid",
-      htmlContent: generatePaidInvoiceContent(
-        invoice.billTo.clientName,
-        invoiceNumber,
-        invoice.amountDue,
-        paidAt
-      ),
+      htmlContent: paidTemplate(invoice),
     });
   } catch (error) {
-    console.log("Error happend while sending email");
     console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error happend while sending paid email notification",
+    });
   }
 
   res.status(200).send({
@@ -297,23 +282,18 @@ export const sendReminder = asyncErrorHandler(async (req, res, next) => {
     );
   }
 
-  const invoiceId = invoice._id.toString();
-  const invoiceNumber = "#" + invoiceId.slice(-4);
-
   try {
     await sendEmail({
       clientEmail: invoice.billTo.clientEmail,
-      subject: `Invoice Reminder: Invoice ${invoiceNumber} Due Soon`,
-      htmlContent: generateReminderInvoiceContent(
-        invoice.billTo.clientName,
-        invoiceNumber,
-        invoice.amountDue,
-        invoice.paymentDue
-      ),
+      subject: `Invoice Reminder: Invoice ${invoice.invoiceNumber} Due Soon`,
+      htmlContent: reminderTemplate(invoice),
     });
   } catch (error) {
-    console.log("Error happend while sending email");
     console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error happend while sending email reminder",
+    });
   }
 
   res.status(200).send({

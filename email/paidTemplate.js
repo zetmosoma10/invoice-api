@@ -1,18 +1,17 @@
-function generatePaidInvoiceContent(
-  clientName,
-  invoiceNumber,
-  amoutDue,
-  paidAt
-) {
+import dayjs from "dayjs";
+
+function paidTemplate(invoice) {
   return `
   <html>
     <body style="font-family: Arial, sans-serif; color: #333;">
       <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-        <h2 style="color: #4CAF50;">Hello ${clientName},</h2>
+        <h2 style="color: #4CAF50;">Hello ${invoice.billTo.clientName},</h2>
         <p>We’re delighted to inform you that your recent invoice payment has been received.</p>
-        <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
-        <p><strong>Amount Paid:</strong> R${amoutDue}</p>
-        <p><strong>Date Paid:</strong> ${paidAt}</p>
+        <p><strong>Invoice Number:</strong> ${invoice.invoiceNumber}</p>
+        <p><strong>Amount Paid:</strong> R${invoice.amountDue}</p>
+        <p><strong>Date Paid:</strong> ${dayjs(invoice.paidAt).format(
+          "DD MMM, YYYY"
+        )}</p>
         <p>Your account balance is now updated. Thank you for your prompt payment and for trusting us with your business.</p>
         <p>Best regards,<br>Web DevSolution</p>
       </div>
@@ -21,4 +20,4 @@ function generatePaidInvoiceContent(
         `;
 }
 
-export default generatePaidInvoiceContent;
+export default paidTemplate;
