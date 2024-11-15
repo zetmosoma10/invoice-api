@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  deleteImage,
   getCurrentUser,
   register,
   uploadImage,
@@ -14,5 +15,6 @@ router.route("/profile").get(auth, getCurrentUser);
 router
   .route("/profile/upload-image")
   .post(auth, upload.single("profilePicture"), uploadImage);
+router.route("/profile/delete-image").post(auth, deleteImage);
 
 export default router;

@@ -60,6 +60,7 @@ export const uploadImage = asyncErrorHandler(async (req, res, next) => {
       userId,
       {
         profilePicUrl: result.secure_url,
+        profilePicId: result.public_id,
       },
       { new: true }
     );
@@ -74,5 +75,33 @@ export const uploadImage = asyncErrorHandler(async (req, res, next) => {
     res
       .status(500)
       .send({ success: false, message: "Failed to upload to Cloudinary" });
+  }
+});
+
+export const deleteImage = asyncErrorHandler(async (req, res, next) => {
+  const user = req.user;
+
+  try {
+    await cloudinary.uploader.destroy(user.profilePicId);
+
+    await User.findByIdAndUpdate(
+      user._id,
+      {
+        profilePicUrl: undefined,
+        profilePicId: null,
+      },
+      { new: true }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Profile picture deleted successfully",
+      profilePicUrl: null,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "error deleting profile pic in cloudinary",
+    });
   }
 });
