@@ -2,7 +2,7 @@ import express from "express";
 import {
   deleteImage,
   getCurrentUser,
-  register,
+  updateUser,
   uploadImage,
 } from "../controllers/usersControllers.js";
 import auth from "../middlewares/auth.js";
@@ -10,11 +10,12 @@ import upload from "../configs/multer.js";
 
 const router = express.Router();
 
-router.route("/register").post(register);
-router.route("/profile").get(auth, getCurrentUser);
+router.route("/get-current-user").get(auth, getCurrentUser);
+router.route("/update-user").patch(auth, updateUser);
+
+router.route("/delete-profile-image").post(auth, deleteImage);
 router
-  .route("/profile/upload-image")
+  .route("/upload-profile-image")
   .post(auth, upload.single("profilePicture"), uploadImage);
-router.route("/profile/delete-image").post(auth, deleteImage);
 
 export default router;

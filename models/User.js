@@ -32,12 +32,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  profilePicId: String,
+  profilePicId: {
+    type: String,
+    default: null,
+  },
 });
 
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 10);
+  try {
+    if (this.isModified("password")) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  } catch (err) {
+    next(err);
   }
 
   next();
@@ -66,14 +73,21 @@ const validateUser = (data) => {
     profilePicId: joi.string(),
   });
 
-  const { error } = schema.validate(data);
-  if (error) {
-    return error.details[0].message;
-  } else {
-    return null;
-  }
+  const { error } = schema.validate(data, { abortEarly: false });
+  return error ? error.details.map((err) => err.message) : null;
+};
+
+const validateUserUpdate = (data) => {
+  const schema = joi.object({
+    firstName: joi.string().min(3).max(50).optional(),
+    lastName: joi.string().min(3).max(50).optional(),
+    email: joi.string().email().optional(),
+  });
+
+  const { error } = schema.validate(data, { abortEarly: false });
+  return error ? error.details.map((err) => err.message) : null;
 };
 
 const User = mongoose.model("User", userSchema);
 
-export { User, validateUser };
+export { User, validateUser, validateUserUpdate };
