@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import joi from "joi";
+import crypto from "crypto";
+import dayjs from "dayjs";
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -36,6 +38,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  resetPasswordToken: String,
+  resetPasswordTokenExpire: Date,
 });
 
 userSchema.pre("save", async function (next) {
@@ -63,6 +67,20 @@ userSchema.methods.generateJwt = function () {
   );
 };
 
+userSchema.methods.createResetPasswordToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  // ! Start token expire Timer
+  this.resetPasswordTokenExpire = dayjs().add(15, "minutes");
+
+  return token;
+};
+
 const validateUser = (data) => {
   const schema = joi.object({
     firstName: joi.string().min(3).max(50).required(),
@@ -88,6 +106,15 @@ const validateUserUpdate = (data) => {
   return error ? error.details.map((err) => err.message) : null;
 };
 
+function validatePassword(data) {
+  const schema = joi.object({
+    password: joi.string().min(4).required(),
+  });
+
+  const { error } = schema.validate(data);
+  return error ? error.details[0].message : null;
+}
+
 const User = mongoose.model("User", userSchema);
 
-export { User, validateUser, validateUserUpdate };
+export { User, validateUser, validatePassword, validateUserUpdate };

@@ -12,6 +12,8 @@ function reminderTemplate(invoice) {
         <a href="#" style="padding: 10px 20px; background-color: #FF6347; color: #fff; text-decoration: none; border-radius: 5px;">View Invoice</a>
         <p>Thank you for your prompt attention to this matter. If you have any questions, feel free to reach out to us.</p>
         <p>Best regards,<br>Web DevSolution</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #888;">If you need help or have questions, contact us at <a href="mailto:support@webdevsolution.com">support@webdevsolution.com</a>.</p>
       </div>
     </body>
   </html>

@@ -9,7 +9,9 @@ function template(invoice) {
         <p><strong>Amount Due:</strong> R${invoice.amountDue}</p>
         <p><strong>Due Date:</strong> ${invoice.paymentDue}</p>
         <p>To view your invoice, click the button below:</p>
-        <a href="#" style="padding: 10px 20px; background-color: #4CAF50; color: #fff; text-decoration: none; border-radius: 5px;">View Invoice</a> 
+        <a href="#" style="padding: 10px 20px; background-color: #4CAF50; color: #fff; text-decoration: none; border-radius: 5px;">View Invoice</a>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #888;">If you need help or have questions, contact us at <a href="mailto:support@webdevsolution.com">support@webdevsolution.com</a>.</p> 
       </div>
     </body>
   </html>

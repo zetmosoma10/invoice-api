@@ -14,6 +14,8 @@ function paidTemplate(invoice) {
         )}</p>
         <p>Your account balance is now updated. Thank you for your prompt payment and for trusting us with your business.</p>
         <p>Best regards,<br>Web DevSolution</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #888;">If you need help or have questions, contact us at <a href="mailto:support@webdevsolution.com">support@webdevsolution.com</a>.</p>
       </div>
     </body>
   </html>
