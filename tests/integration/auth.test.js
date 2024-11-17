@@ -50,6 +50,18 @@ describe("/api/auth", () => {
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });
+
+    it("should return 400 if invalid credentials passed", async () => {
+      const res = await request(server).post("/api/auth/register").send({
+        firstName: false,
+        lastName: false,
+        email: false,
+        password: false,
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
   });
 
   describe("/login", () => {
