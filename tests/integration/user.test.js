@@ -1,12 +1,12 @@
 import request from "supertest";
-import { beforeEach, afterEach, it, expect, describe } from "vitest";
+import { beforeEach, expect, describe } from "vitest";
 import { User } from "../../models/User.js";
 
 let server;
 let token;
 
 describe("/api/user", () => {
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module = await import("../../server.js"); // Dynamically import server
     server = module.default || module;
   });
@@ -22,43 +22,16 @@ describe("/api/user", () => {
     token = user.generateJwt();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     if (server) {
       await server.close(); // Close server after each test
     }
-    token = "";
   });
 
-  describe("/register", () => {
-    it("should register a user and return the registered user", async () => {
-      const res = await request(server).post("/api/user/register").send({
-        firstName: "aaa",
-        lastName: "bbb",
-        email: "b@b.com",
-        password: "123456",
-      });
-
-      expect(res.status).toBe(201);
-      expect(res.body.success).toBe(true);
-      expect(res.body).toHaveProperty("token");
-    });
-
-    it("should return error if email already exist in db", async () => {
-      const res = await request(server).post("/api/user/register").send({
-        firstName: "cccc",
-        lastName: "dddd",
-        email: "z@z.com",
-        password: "1223445",
-      });
-
-      expect(res.body.success).toBe(false);
-    });
-  });
-
-  describe("/me", () => {
+  describe("/get-current-user", () => {
     it("should return current logged in user", async () => {
       const res = await request(server)
-        .get("/api/user/me")
+        .get("/api/user/get-current-user")
         .set("authorization", `Bearer ${token}`);
 
       expect(res.status).toBe(200);
@@ -72,12 +45,51 @@ describe("/api/user", () => {
 
     it("should return 401 if user not logged in", async () => {
       const res = await request(server)
-        .get("/api/user/me")
+        .get("/api/user/get-current-user")
         .set("authorization", `Bearer `);
 
       expect(res.status).toBe(401);
       expect(res.body.success).toBe(false);
       expect(res.body.message).toMatch(/token missing/i);
+    });
+  });
+
+  describe("/update-user", () => {
+    it("should return 200 and updated user", async () => {
+      const res = await request(server)
+        .patch("/api/user/update-user")
+        .set("authorization", `Bearer ${token}`)
+        .send({ firstName: "John", lastName: "Smith" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.user).toMatchObject({
+        firstName: "John",
+        lastName: "Smith",
+      });
+    });
+
+    it("should return 400 if password is provided", async () => {
+      const res = await request(server)
+        .patch("/api/user/update-user")
+        .set("authorization", `Bearer ${token}`)
+        .send({ password: "123456" });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(
+        /Password cannot be update with this operation/i
+      );
+    });
+
+    it("should return 400 if invalid credentials passed", async () => {
+      const res = await request(server)
+        .patch("/api/user/update-user")
+        .set("authorization", `Bearer ${token}`)
+        .send({ firstName: "aa", lastName: "bb", email: "invalid" });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
     });
   });
   //

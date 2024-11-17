@@ -106,6 +106,20 @@ const validateUserUpdate = (data) => {
   return error ? error.details.map((err) => err.message) : null;
 };
 
+const validateLoginInput = (data) => {
+  const schema = joi.object({
+    email: joi.string().email().required(),
+    password: joi.string().min(4).max(150).required(),
+  });
+
+  const { error } = schema.validate(data);
+  if (error) {
+    return error.details[0].message;
+  } else {
+    return null;
+  }
+};
+
 function validatePassword(data) {
   const schema = joi.object({
     password: joi.string().min(4).required(),
@@ -117,4 +131,10 @@ function validatePassword(data) {
 
 const User = mongoose.model("User", userSchema);
 
-export { User, validateUser, validatePassword, validateUserUpdate };
+export {
+  User,
+  validateUser,
+  validatePassword,
+  validateUserUpdate,
+  validateLoginInput,
+};

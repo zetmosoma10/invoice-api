@@ -3,16 +3,15 @@ import { beforeEach, afterEach, it, expect, describe } from "vitest";
 import { User } from "../../models/User.js";
 
 let server;
-let user;
 
-describe("Authentication", () => {
-  beforeEach(async () => {
+describe("/api/auth", () => {
+  beforeAll(async () => {
     const module = await import("../../server.js"); // Dynamically import server
     server = module.default || module;
   });
 
   beforeEach(async () => {
-    user = await User.create({
+    await User.create({
       firstName: "aaa",
       lastName: "bbb",
       email: "z@z.com",
@@ -20,52 +19,73 @@ describe("Authentication", () => {
     });
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     if (server) {
       await server.close(); // Close server after each test
     }
   });
 
-  it("should return 401 if token not provided", async () => {
-    const res = await request(server)
-      .get("/api/user/me")
-      .set("authorization", `Bearer `);
+  describe("/register", () => {
+    it("should register a user and return the registered user", async () => {
+      const res = await request(server).post("/api/auth/register").send({
+        firstName: "aaa",
+        lastName: "bbb",
+        email: "b@b.com",
+        password: "123456",
+      });
 
-    expect(res.status).toBe(401);
-    expect(res.body.success).toBe(false);
-    expect(res.body.message).toMatch(/Authentication token missing/i);
-  });
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body).toHaveProperty("token");
+    });
 
-  it("should return 401 if user associated with token does not exist", async () => {
-    const token = user.generateJwt();
-    await User.deleteMany({});
-    console.log(token);
-    console.log(user);
+    it("should return error if email already exist in db", async () => {
+      const res = await request(server).post("/api/auth/register").send({
+        firstName: "cccc",
+        lastName: "dddd",
+        email: "z@z.com",
+        password: "1223445",
+      });
 
-    const res = await request(server)
-      .get("/api/user/me")
-      .set("authorization", `Bearer ${token}`);
-
-    expect(res.status).toBe(401);
-    expect(res.body.success).toBe(false);
-    expect(res.body.message).toMatch(
-      /User associated with the token doest not exist/i
-    );
-  });
-
-  it("should attach user to req object if authentication passed", async () => {
-    const token = user.generateJwt();
-
-    const res = await request(server)
-      .get("/api/user/me")
-      .set("authorization", `Bearer ${token}`);
-
-    expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.user).toMatchObject({
-      firstName: "aaa",
-      lastName: "bbb",
-      email: "z@z.com",
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
     });
   });
+
+  describe("/login", () => {
+    it("should return token if valid credentials provided", async () => {
+      const res = await request(server).post("/api/auth/login").send({
+        email: "z@z.com",
+        password: "123456",
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body).toHaveProperty("token");
+    });
+
+    it("should return 401 if invalid email provided", async () => {
+      const res = await request(server).post("/api/auth/login").send({
+        email: "pa@gmail.com",
+        password: "123456",
+      });
+
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/Invalid email or password/i);
+    });
+
+    it("should return 401 if invalid password provided", async () => {
+      const res = await request(server).post("/api/auth/login").send({
+        email: "z@z.com",
+        password: "invalid",
+      });
+
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/Invalid email or password/i);
+    });
+  });
+
+  //
 });

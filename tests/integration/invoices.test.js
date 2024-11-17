@@ -10,7 +10,7 @@ let invoice;
 let user;
 
 describe("/api/invoices", () => {
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module = await import("../../server.js"); // Dynamically import server
     server = module.default || module;
   });
@@ -28,6 +28,7 @@ describe("/api/invoices", () => {
     // * add invoices to db
     invoice = await Invoice.create({
       user: user._id,
+      status: "Draft",
       billFrom: {
         address: {
           street: "391 Main St",
@@ -53,9 +54,10 @@ describe("/api/invoices", () => {
         ],
       },
     });
+    //
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     if (server) {
       await server.close(); // Close server after each test
     }
@@ -75,7 +77,7 @@ describe("/api/invoices", () => {
         .post("/api/invoices")
         .set("authorization", `Bearer ${token}`)
         .send({
-          user: user._id,
+          status: "Draft",
           billFrom: {
             address: {
               street: "391 Main St",
@@ -153,7 +155,7 @@ describe("/api/invoices", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.count).toBe(1);
+      expect(res.body.totalInvoices).toBe(1);
       expect(res.body.invoices).toBeInstanceOf(Array);
       expect(res.body.invoices[0]).toHaveProperty("user", expect.any(String));
       expect(res.body.invoices[0].billTo).toHaveProperty(

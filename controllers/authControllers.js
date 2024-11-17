@@ -1,32 +1,17 @@
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import joi from "joi";
 import dayjs from "dayjs";
 import {
   User,
   validateUser,
   validatePassword,
-  validateUserUpdate,
+  validateLoginInput,
 } from "../models/User.js";
 import asyncErrorHandler from "./../utils/asyncErrorHandler.js";
 import CustomError from "./../utils/CustomError.js";
 import sendEmail from "./../email/email.js";
 import resetPasswordTemplate from "../email/resetPasswordTemplate.js";
 import passwordSuccessTemplate from "../email/passwordSuccessTemplate.js";
-
-const validateLoginInput = (data) => {
-  const schema = joi.object({
-    email: joi.string().email().required(),
-    password: joi.string().min(4).max(150).required(),
-  });
-
-  const { error } = schema.validate(data);
-  if (error) {
-    return error.details[0].message;
-  } else {
-    return null;
-  }
-};
 
 export const login = asyncErrorHandler(async (req, res, next) => {
   const err = validateLoginInput(req.body);
