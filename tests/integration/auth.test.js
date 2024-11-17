@@ -1,5 +1,5 @@
 import request from "supertest";
-import { beforeEach, afterEach, it, expect, describe } from "vitest";
+import { beforeEach, it, expect, describe } from "vitest";
 import { User } from "../../models/User.js";
 
 let server;
@@ -64,7 +64,7 @@ describe("/api/auth", () => {
       expect(res.body).toHaveProperty("token");
     });
 
-    it("should return 401 if invalid email provided", async () => {
+    it("should return 401 if provided email is not in database", async () => {
       const res = await request(server).post("/api/auth/login").send({
         email: "pa@gmail.com",
         password: "123456",
@@ -75,7 +75,7 @@ describe("/api/auth", () => {
       expect(res.body.message).toMatch(/Invalid email or password/i);
     });
 
-    it("should return 401 if invalid password provided", async () => {
+    it("should return 401 if provided password do not match database password", async () => {
       const res = await request(server).post("/api/auth/login").send({
         email: "z@z.com",
         password: "invalid",
@@ -84,6 +84,26 @@ describe("/api/auth", () => {
       expect(res.status).toBe(401);
       expect(res.body.success).toBe(false);
       expect(res.body.message).toMatch(/Invalid email or password/i);
+    });
+
+    it("should return 400 if invalid email passed", async () => {
+      const res = await request(server).post("/api/auth/login").send({
+        email: "Invalid",
+        password: "123456",
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should return 400 if invalid password passed", async () => {
+      const res = await request(server).post("/api/auth/login").send({
+        email: "z@z.com",
+        password: "A",
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
     });
   });
 
