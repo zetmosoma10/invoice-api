@@ -11,14 +11,12 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
 
   const err = validateInvoice(req.body);
   if (err) {
-    console.log(err);
     return next(new CustomError(err, 400));
   }
 
   const { billFrom, billTo, status } = req.body;
 
   if (!["Draft", "Pending"].includes(status)) {
-    console.log("Status must be 'draft' or 'pending' at creation");
     return next(
       new CustomError("Status must be 'draft' or 'pending' at creation", 400)
     );
