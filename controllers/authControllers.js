@@ -81,11 +81,11 @@ export const forgotPassword = asyncErrorHandler(async (req, res, next) => {
 
   // * 3 -> send email token
   try {
-    await sendEmail({
-      clientEmail: email,
-      subject: "We’ve Received Your Password Reset Request",
-      htmlContent: resetPasswordTemplate(user, resetUrl),
-    });
+    // await sendEmail({
+    //   clientEmail: email,
+    //   subject: "We’ve Received Your Password Reset Request",
+    //   htmlContent: resetPasswordTemplate(user, resetUrl),
+    // });
 
     res.status(200).send({
       success: true,
@@ -145,15 +145,15 @@ export const resetPassword = asyncErrorHandler(async (req, res, next) => {
   // * 5 -> Generate jwt
   const jwt = user.generateJwt();
 
-  try {
-    await sendEmail({
-      clientEmail: user.email,
-      subject: "Your Password Has Been Successfully Reset",
-      htmlContent: passwordSuccessTemplate(user),
-    });
-  } catch (error) {
-    console.log(error);
-  }
+  // try {
+  //   await sendEmail({
+  //     clientEmail: user.email,
+  //     subject: "Your Password Has Been Successfully Reset",
+  //     htmlContent: passwordSuccessTemplate(user),
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  // }
 
   // * 6 -> notify user
   res.status(200).send({

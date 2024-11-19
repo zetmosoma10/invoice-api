@@ -14,7 +14,16 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
     return next(new CustomError(err, 400));
   }
 
-  const { billFrom, billTo, status } = req.body;
+  const {
+    status,
+    senderAddress,
+    clientName,
+    clientEmail,
+    clientAddress,
+    paymentTerms,
+    description,
+    items,
+  } = req.body;
 
   if (!["Draft", "Pending"].includes(status)) {
     return next(
@@ -25,36 +34,32 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
   const invoice = await Invoice.create({
     user: user._id,
     status: status,
-    billFrom: {
-      address: {
-        street: billFrom.address.street,
-        city: billFrom.address.city,
-        postalCode: billFrom.address.postalCode,
-        country: billFrom.address.country,
-      },
+    senderAddress: {
+      street: senderAddress.street,
+      city: senderAddress.city,
+      postalCode: senderAddress.postalCode,
+      country: senderAddress.country,
     },
-    billTo: {
-      clientName: billTo.clientName,
-      clientEmail: billTo.clientEmail,
-      address: {
-        street: billTo.address.street,
-        city: billTo.address.city,
-        postalCode: billTo.address.postalCode,
-        country: billTo.address.country,
-      },
-      paymentTerms: billTo.paymentTerms,
-      projectDescription: billTo.projectDescription,
-      items: billTo.items.map((item) => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-      })),
+    clientName: clientName,
+    clientEmail: clientEmail,
+    clientAddress: {
+      street: clientAddress.street,
+      city: clientAddress.city,
+      postalCode: clientAddress.postalCode,
+      country: clientAddress.country,
     },
+    paymentTerms: paymentTerms,
+    description: description,
+    items: items.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+    })),
   });
 
   // try {
   //   await sendEmail({
-  //     clientEmail: invoice.billTo.clientEmail,
+  //     clientEmail: invoice.clientEmail,
   //     subject: "Your Invoice is Created",
   //     htmlContent: template(invoice),
   //   });
@@ -154,51 +159,40 @@ export const updateInvoice = asyncErrorHandler(async (req, res, next) => {
     id,
     {
       $set: {
-        billFrom: {
-          address: {
-            street:
-              updateData.billFrom?.address?.street ||
-              currentInvoice.billFrom.address.street,
-            city:
-              updateData.billFrom?.address?.city ||
-              currentInvoice.billFrom.address.city,
-            postalCode:
-              updateData.billFrom?.address?.postalCode ||
-              currentInvoice.billFrom.address.postalCode,
-            country:
-              updateData.billFrom?.address?.country ||
-              currentInvoice.billFrom.address.country,
-          },
+        senderAddress: {
+          street:
+            updateData?.senderAddress?.street ||
+            currentInvoice.senderAddress.street,
+          city:
+            updateData?.senderAddress?.city ||
+            currentInvoice.senderAddress.city,
+          postalCode:
+            updateData?.senderAddress?.postalCode ||
+            currentInvoice.senderAddress.postalCode,
+          country:
+            updateData?.senderAddress?.country ||
+            currentInvoice.senderAddress.country,
         },
-        billTo: {
-          clientName:
-            updateData.billTo?.clientName || currentInvoice.billTo.clientName,
-          clientEmail:
-            updateData.billTo?.clientEmail || currentInvoice.billTo.clientEmail,
-          address: {
-            street:
-              updateData.billTo?.address?.street ||
-              currentInvoice.billTo.address.street,
-            city:
-              updateData.billTo?.address?.city ||
-              currentInvoice.billTo.address.city,
-            postalCode:
-              updateData.billTo?.address?.postalCode ||
-              currentInvoice.billTo.address.postalCode,
-            country:
-              updateData.billTo?.address?.country ||
-              currentInvoice.billTo.address.country,
-          },
-          invoiceDate:
-            updateData.billTo?.invoiceDate || currentInvoice.billTo.invoiceDate,
-          paymentTerms:
-            updateData.billTo?.paymentTerms ||
-            currentInvoice.billTo.paymentTerms,
-          projectDescription:
-            updateData.billTo?.projectDescription ||
-            currentInvoice.billTo.projectDescription,
-          items: updateData.billTo?.items || currentInvoice.billTo.items,
+        clientName: updateData?.clientName || currentInvoice.clientName,
+        clientEmail: updateData?.clientEmail || currentInvoice.clientEmail,
+        clientAddress: {
+          street:
+            updateData?.clientAddress?.street ||
+            currentInvoice.clientAddress.street,
+          city:
+            updateData?.clientAddress?.city ||
+            currentInvoice.clientAddress.city,
+          postalCode:
+            updateData?.clientAddress?.postalCode ||
+            currentInvoice.clientAddress.postalCode,
+          country:
+            updateData?.clientAddress?.country ||
+            currentInvoice.clientAddress.country,
         },
+        invoiceDate: currentInvoice.invoiceDate,
+        paymentTerms: updateData?.paymentTerms || currentInvoice.paymentTerms,
+        description: updateData?.description || currentInvoice.description,
+        items: updateData?.items || currentInvoice.items,
       },
     },
     {
@@ -245,7 +239,7 @@ export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
 
   // try {
   //   await sendEmail({
-  //     clientEmail: invoice.billTo.clientEmail,
+  //     clientEmail: invoice.clientEmail,
   //     subject: "Your Invoice is Paid",
   //     htmlContent: paidTemplate(invoice),
   //   });
@@ -282,19 +276,19 @@ export const sendReminder = asyncErrorHandler(async (req, res, next) => {
     );
   }
 
-  try {
-    await sendEmail({
-      clientEmail: invoice.billTo.clientEmail,
-      subject: `Invoice Reminder: Invoice ${invoice.invoiceNumber} Due Soon`,
-      htmlContent: reminderTemplate(invoice),
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send({
-      success: false,
-      message: "Error happend while sending email reminder",
-    });
-  }
+  // try {
+  //   await sendEmail({
+  //     clientEmail: invoice.clientEmail,
+  //     subject: `Invoice Reminder: Invoice ${invoice.invoiceNumber} Due Soon`,
+  //     htmlContent: reminderTemplate(invoice),
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  //   return res.status(500).send({
+  //     success: false,
+  //     message: "Error happend while sending email reminder",
+  //   });
+  // }
 
   res.status(200).send({
     success: true,

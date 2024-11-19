@@ -3,7 +3,7 @@ function reminderTemplate(invoice) {
   <html>
     <body style="font-family: Arial, sans-serif; color: #333;">
       <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-        <h2 style="color: #FF6347;">Hello ${invoice.billTo.clientName},</h2>
+        <h2 style="color: #FF6347;">Hello ${invoice.clientName},</h2>
         <p>This is a friendly reminder that your invoice is due soon.</p>
         <p><strong>Invoice Number:</strong> ${invoice.invoiceNumber}</p>
         <p><strong>Amount Due:</strong> R${invoice.amountDue}</p>

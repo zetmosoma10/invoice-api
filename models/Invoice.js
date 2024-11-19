@@ -35,39 +35,40 @@ const invoiceSchema = new mongoose.Schema(
       enum: ["Draft", "Pending", "Paid"],
       required: true,
     },
-    billFrom: {
-      address: {
-        type: addressSchema,
-        required: true,
-      },
+    senderAddress: {
+      type: addressSchema,
+      required: true,
     },
-    billTo: {
-      clientName: { type: String, required: true, minLength: 3, maxLength: 50 },
-      clientEmail: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true,
-      },
-      address: {
-        type: addressSchema,
-        required: true,
-      },
-      invoiceDate: { type: Date, default: Date.now },
-      paidAt: Date,
-      paymentTerms: {
-        type: String,
-        enum: ["Next 1 day", "Next 7 days", "Next 14 days", "Next 30 days"],
-        required: true,
-      },
-      projectDescription: {
-        type: String,
-        required: true,
-        minLength: 5,
-        maxLength: 150,
-      },
-      items: [itemSchema],
+    clientName: {
+      type: String,
+      required: true,
+      minLength: 3,
+      maxLength: 50,
     },
+    clientEmail: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    clientAddress: {
+      type: addressSchema,
+      required: true,
+    },
+    invoiceDate: { type: Date, default: Date.now },
+    paidAt: Date,
+    paymentTerms: {
+      type: String,
+      enum: ["Net 1 day", "Net 7 days", "Net 14 days", "Net 30 days"],
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+      minLength: 5,
+      maxLength: 150,
+    },
+    items: [itemSchema],
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -110,50 +111,38 @@ const validateInvoice = (data) => {
       "any.only": "Status terms must be one of: 'Draft', 'Pending', or 'Paid'.",
       "any.required": "Status terms are required.",
     }),
-    billFrom: joi
-      .object({
-        address: addressSchema.required(),
-      })
+    senderAddress: addressSchema.required(),
+    clientName: joi.string().min(3).max(50).required().messages({
+      "string.empty": "Client name is required.",
+      "string.min": "Client name must be at least 3 characters.",
+      "string.max": "Client name must be no more than 50 characters.",
+    }),
+    clientEmail: joi.string().email().required().messages({
+      "string.email": "Client email must be a valid email address.",
+      "string.empty": "Client email is required.",
+    }),
+    invoiceDate: joi.date().default(Date.now).messages({
+      "date.base": "Invoice date must be a valid date.",
+    }),
+    paidAt: joi.date(),
+    description: joi.string().min(5).max(150).required().messages({
+      "string.empty": "Project description is required.",
+      "string.min": "Project description must be at least 5 characters.",
+      "string.max": "Project description must be no more than 150 characters.",
+    }),
+    paymentTerms: joi
+      .string()
+      .valid("Net 1 day", "Net 7 days", "Net 14 days", "Net 30 days")
       .required()
       .messages({
-        "any.required": "Billing address (billFrom) is required.",
+        "any.only":
+          "Payment terms must be one of: 'Net 1 day', 'Net 7 days', 'Net 14 days', or 'Net 30 days'.",
+        "any.required": "Payment terms are required.",
       }),
-    billTo: joi
-      .object({
-        clientName: joi.string().min(3).max(50).required().messages({
-          "string.empty": "Client name is required.",
-          "string.min": "Client name must be at least 3 characters.",
-          "string.max": "Client name must be no more than 50 characters.",
-        }),
-        clientEmail: joi.string().email().required().messages({
-          "string.email": "Client email must be a valid email address.",
-          "string.empty": "Client email is required.",
-        }),
-        invoiceDate: joi.date().default(Date.now).messages({
-          "date.base": "Invoice date must be a valid date.",
-        }),
-        paidAt: joi.date(),
-        projectDescription: joi.string().min(5).max(150).required().messages({
-          "string.empty": "Project description is required.",
-          "string.min": "Project description must be at least 5 characters.",
-          "string.max":
-            "Project description must be no more than 150 characters.",
-        }),
-        paymentTerms: joi
-          .string()
-          .valid("Next 1 day", "Next 7 days", "Next 14 days", "Next 30 days")
-          .required()
-          .messages({
-            "any.only":
-              "Payment terms must be one of: 'Next 1 day', 'Next 7 days', 'Next 14 days', or 'Next 30 days'.",
-            "any.required": "Payment terms are required.",
-          }),
-        address: addressSchema.required(),
-        items: joi.array().items(itemSchema).min(1).required().messages({
-          "array.min": "There must be at least one item in the items list.",
-        }),
-      })
-      .required(),
+    clientAddress: addressSchema.required(),
+    items: joi.array().items(itemSchema).min(1).required().messages({
+      "array.min": "There must be at least one item in the items list.",
+    }),
   });
 
   const { error } = invoiceJoiSchema.validate(data);
@@ -165,7 +154,7 @@ const validateInvoice = (data) => {
 };
 
 invoiceSchema.virtual("amountDue").get(function () {
-  return this.billTo.items.reduce(
+  return this.items.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
@@ -177,23 +166,23 @@ invoiceSchema.virtual("invoiceNumber").get(function () {
 });
 
 invoiceSchema.virtual("paymentDue").get(function () {
-  if (this.billTo.paymentTerms === "Next 1 day") {
-    const paymentDue = dayjs(this.billTo.invoiceDate).add(1, "day");
+  if (this.paymentTerms === "Net 1 day") {
+    const paymentDue = dayjs(this.invoiceDate).add(1, "day");
     return dayjs(paymentDue).format("DD MMM, YYYY");
   }
 
-  if (this.billTo.paymentTerms === "Next 7 days") {
-    const paymentDue = dayjs(this.billTo.invoiceDate).add(7, "days");
+  if (this.paymentTerms === "Net 7 days") {
+    const paymentDue = dayjs(this.invoiceDate).add(7, "days");
     return dayjs(paymentDue).format("DD MMM, YYYY");
   }
 
-  if (this.billTo.paymentTerms === "Next 14 days") {
-    const paymentDue = dayjs(this.billTo.invoiceDate).add(14, "days");
+  if (this.paymentTerms === "Net 14 days") {
+    const paymentDue = dayjs(this.invoiceDate).add(14, "days");
     return dayjs(paymentDue).format("DD MMM, YYYY");
   }
 
-  if (this.billTo.paymentTerms === "Next 30 days") {
-    const paymentDue = dayjs(this.billTo.invoiceDate).add(1, "month");
+  if (this.paymentTerms === "Net 30 days") {
+    const paymentDue = dayjs(this.invoiceDate).add(1, "month");
     return dayjs(paymentDue).format("DD MMM, YYYY");
   }
 });
@@ -201,3 +190,33 @@ invoiceSchema.virtual("paymentDue").get(function () {
 const Invoice = mongoose.model("Invoice", invoiceSchema);
 
 export { Invoice, validateInvoice };
+
+/*
+{
+    "description": "Re-branding",
+    "paymentTerms": "Net 7 days",
+    "clientName": "Jensen Huang",
+    "clientEmail": "jensenh@mail.com",
+    "status": "Pending",
+    "senderAddress": {
+      "street": "19 Union Terrace",
+      "city": "London",
+      "postCode": "E1 3EZ",
+      "country": "United Kingdom"
+    },
+    "clientAddress": {
+      "street": "106 Kendell Street",
+      "city": "Sharrington",
+      "postCode": "NR24 5WQ",
+      "country": "United Kingdom"
+    },
+    "items": [
+      {
+        "name": "Brand Guidelines",
+        "quantity": 1,
+        "price": 1800.90,
+        "total": 1800.90
+      }
+    ]
+  }
+*/
