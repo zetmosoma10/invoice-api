@@ -190,33 +190,3 @@ invoiceSchema.virtual("paymentDue").get(function () {
 const Invoice = mongoose.model("Invoice", invoiceSchema);
 
 export { Invoice, validateInvoice };
-
-/*
-{
-    "description": "Re-branding",
-    "paymentTerms": "Net 7 days",
-    "clientName": "Jensen Huang",
-    "clientEmail": "jensenh@mail.com",
-    "status": "Pending",
-    "senderAddress": {
-      "street": "19 Union Terrace",
-      "city": "London",
-      "postCode": "E1 3EZ",
-      "country": "United Kingdom"
-    },
-    "clientAddress": {
-      "street": "106 Kendell Street",
-      "city": "Sharrington",
-      "postCode": "NR24 5WQ",
-      "country": "United Kingdom"
-    },
-    "items": [
-      {
-        "name": "Brand Guidelines",
-        "quantity": 1,
-        "price": 1800.90,
-        "total": 1800.90
-      }
-    ]
-  }
-*/

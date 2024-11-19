@@ -28,31 +28,30 @@ describe("/api/invoices", () => {
     // * add invoices to db
     invoice = await Invoice.create({
       user: user._id,
-      status: "Draft",
-      billFrom: {
-        address: {
-          street: "391 Main St",
-          city: "Pretoria",
-          postalCode: "3001",
-          country: "South Africa",
-        },
+      status: "Pending",
+      clientName: "Jensen Huang",
+      clientEmail: "jensenh@mail.com",
+      description: "Re-branding",
+      paymentTerms: "Net 7 days",
+      senderAddress: {
+        street: "19 Union Terrace",
+        city: "London",
+        postalCode: "E1 3EZ",
+        country: "United Kingdom",
       },
-      billTo: {
-        clientName: "France",
-        clientEmail: "france@gmail.com",
-        address: {
-          street: "400 Clive St",
-          city: "Midrand",
-          postalCode: "5000",
-          country: "South Africa",
-        },
-        paymentTerms: "Next 7 days",
-        projectDescription: "Database managment",
-        items: [
-          { name: "Design", quantity: 2, price: 700 },
-          { name: "Development", quantity: 4, price: 150 },
-        ],
+      clientAddress: {
+        street: "106 Kendell Street",
+        city: "Sharrington",
+        postalCode: "NR24 5WQ",
+        country: "United Kingdom",
       },
+      items: [
+        {
+          name: "Brand Guidelines",
+          quantity: 1,
+          price: 1800.9,
+        },
+      ],
     });
     //
   });
@@ -77,35 +76,53 @@ describe("/api/invoices", () => {
         .post("/api/invoices")
         .set("authorization", `Bearer ${token}`)
         .send({
-          status: "Draft",
-          billFrom: {
-            address: {
-              street: "391 Main St",
-              city: "Pretoria",
-              postalCode: "3001",
-              country: "South Africa",
-            },
+          status: "Pending",
+          clientName: "Jensen Huang",
+          clientEmail: "jensenh@mail.com",
+          description: "Re-branding",
+          paymentTerms: "Net 7 days",
+          senderAddress: {
+            street: "19 Union Terrace",
+            city: "London",
+            postalCode: "E1 3EZ",
+            country: "United Kingdom",
           },
-          billTo: {
-            clientName: "France",
-            clientEmail: "france@gmail.com",
-            address: {
-              street: "400 Clive St",
-              city: "Midrand",
-              postalCode: "5000",
-              country: "South Africa",
-            },
-            paymentTerms: "Next 7 days",
-            projectDescription: "Database managment",
-            items: [
-              { name: "Design", quantity: 2, price: 700 },
-              { name: "Development", quantity: 4, price: 150 },
-            ],
+          clientAddress: {
+            street: "106 Kendell Street",
+            city: "Sharrington",
+            postalCode: "NR24 5WQ",
+            country: "United Kingdom",
           },
+          items: [
+            {
+              name: "Brand Guidelines",
+              quantity: 1,
+              price: 1800.9,
+            },
+          ],
         });
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
+      expect(res.body.invoice).toMatchObject({
+        status: "Pending",
+        clientName: "Jensen Huang",
+        clientEmail: "jensenh@mail.com",
+        description: "Re-branding",
+        paymentTerms: "Net 7 days",
+        senderAddress: {
+          street: "19 Union Terrace",
+          city: "London",
+          postalCode: "E1 3EZ",
+          country: "United Kingdom",
+        },
+        clientAddress: {
+          street: "106 Kendell Street",
+          city: "Sharrington",
+          postalCode: "NR24 5WQ",
+          country: "United Kingdom",
+        },
+      });
     }, 20000);
 
     it("should return 401 if user is not logged in", async () => {
@@ -190,10 +207,7 @@ describe("/api/invoices", () => {
       expect(res.body.totalInvoices).toBe(1);
       expect(res.body.invoices).toBeInstanceOf(Array);
       expect(res.body.invoices[0]).toHaveProperty("user", expect.any(String));
-      expect(res.body.invoices[0].billTo).toHaveProperty(
-        "clientName",
-        "France"
-      );
+      expect(res.body.invoices[0]).toHaveProperty("clientName", "Jensen Huang");
     });
 
     it("should return 401 user not logged in", async () => {
@@ -215,7 +229,7 @@ describe("/api/invoices", () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.invoice).toHaveProperty("user", expect.any(String));
-      expect(res.body.invoice.billTo).toHaveProperty("clientName", "France");
+      expect(res.body.invoice).toHaveProperty("clientName", "Jensen Huang");
     });
 
     it("should return 404 if there is no invoice for given id", async () => {
@@ -259,40 +273,37 @@ describe("/api/invoices", () => {
         .patch(`/api/invoices/${invoice._id}`)
         .set("authorization", `Bearer ${token}`)
         .send({
-          status: "Draft",
-          billFrom: {
-            address: {
-              street: "391 Main St",
-              city: "Pretoria",
-              postalCode: "3001",
-              country: "South Africa",
-            },
+          status: "Pending",
+          clientName: "John Smith",
+          clientEmail: "john@mail.com",
+          description: "Re-branding",
+          paymentTerms: "Net 7 days",
+          senderAddress: {
+            street: "19 Union Terrace",
+            city: "London",
+            postalCode: "E1 3EZ",
+            country: "United Kingdom",
           },
-          billTo: {
-            clientName: "Peter",
-            clientEmail: "peter@gmail.com",
-            address: {
-              street: "400 Clive St",
-              city: "Midrand",
-              postalCode: "5000",
-              country: "South Africa",
-            },
-            paymentTerms: "Next 7 days",
-            projectDescription: "Database managment",
-            items: [
-              { name: "Design", quantity: 2, price: 700 },
-              { name: "Development", quantity: 4, price: 150 },
-            ],
+          clientAddress: {
+            street: "106 Kendell Street",
+            city: "Sharrington",
+            postalCode: "NR24 5WQ",
+            country: "United Kingdom",
           },
+          items: [
+            {
+              name: "Brand Guidelines",
+              quantity: 1,
+              price: 1800.9,
+            },
+          ],
         });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.invoice).toMatchObject({
-        billTo: {
-          clientName: "Peter",
-          clientEmail: "peter@gmail.com",
-        },
+        clientName: "John Smith",
+        clientEmail: "john@mail.com",
       });
     });
 
