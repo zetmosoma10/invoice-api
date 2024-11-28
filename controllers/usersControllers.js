@@ -72,7 +72,7 @@ export const uploadImage = asyncErrorHandler(async (req, res, next) => {
       resource_type: "auto",
     });
 
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       userId,
       {
         profilePicUrl: result.secure_url,
@@ -84,7 +84,7 @@ export const uploadImage = asyncErrorHandler(async (req, res, next) => {
     res.status(200).send({
       success: true,
       message: "Profile picture uploaded successfully",
-      profilePicUrl: result.secure_url,
+      user,
     });
   } catch (error) {
     console.log("cloudinary upload error", error);
@@ -95,13 +95,13 @@ export const uploadImage = asyncErrorHandler(async (req, res, next) => {
 });
 
 export const deleteImage = asyncErrorHandler(async (req, res, next) => {
-  const user = req.user;
+  const userId = req.user._id;
 
   try {
     await cloudinary.uploader.destroy(user.profilePicId);
 
-    await User.findByIdAndUpdate(
-      user._id,
+    const user = await User.findByIdAndUpdate(
+      userId,
       {
         profilePicUrl: null,
         profilePicId: null,
@@ -112,7 +112,7 @@ export const deleteImage = asyncErrorHandler(async (req, res, next) => {
     res.status(200).send({
       success: true,
       message: "Profile picture deleted successfully",
-      profilePicUrl: null,
+      user,
     });
   } catch (error) {
     res.status(500).send({

@@ -110,7 +110,10 @@ export const getAllInvoices = asyncErrorHandler(async (req, res, next) => {
     );
   }
 
-  const invoices = await Invoice.find(query).skip(skip).limit(pageLimit);
+  const invoices = await Invoice.find(query)
+    .sort("createdAt")
+    .skip(skip)
+    .limit(pageLimit);
 
   res.status(200).send({
     success: true,

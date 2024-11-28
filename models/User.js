@@ -5,42 +5,45 @@ import joi from "joi";
 import crypto from "crypto";
 import dayjs from "dayjs";
 
-const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-    minLength: 3,
-    maxLength: 50,
+const userSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      minLength: 3,
+      maxLength: 50,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      minLength: 3,
+      maxLength: 50,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minLength: 4,
+    },
+    profilePicUrl: {
+      type: String,
+      default: null,
+    },
+    profilePicId: {
+      type: String,
+      default: null,
+    },
+    resetPasswordToken: String,
+    resetPasswordTokenExpire: Date,
   },
-  lastName: {
-    type: String,
-    required: true,
-    minLength: 3,
-    maxLength: 50,
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-    lowercase: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    minLength: 4,
-  },
-  profilePicUrl: {
-    type: String,
-    default: null,
-  },
-  profilePicId: {
-    type: String,
-    default: null,
-  },
-  resetPasswordToken: String,
-  resetPasswordTokenExpire: Date,
-});
+  { timestamps: true }
+);
 
 userSchema.pre("save", async function (next) {
   try {
