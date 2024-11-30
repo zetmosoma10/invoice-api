@@ -7,7 +7,7 @@ function paidTemplate(invoice) {
       <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
         <h2 style="color: #4CAF50;">Hello ${invoice.clientName},</h2>
         <p>We’re delighted to inform you that your recent invoice payment has been received.</p>
-        <p><strong>Invoice Number:</strong> ${invoice.invoiceNumber}</p>
+        <p><strong>Invoice Number:</strong> ${invoice.invoiceNumber.toUpperCase()}</p>
         <p><strong>Amount Paid:</strong> R${invoice.amountDue}</p>
         <p><strong>Date Paid:</strong> ${dayjs(invoice.paidAt).format(
           "DD MMM, YYYY"

@@ -57,16 +57,16 @@ export const createInvoice = asyncErrorHandler(async (req, res, next) => {
     })),
   });
 
-  // try {
-  //   await sendEmail({
-  //     clientEmail: invoice.clientEmail,
-  //     subject: "Your Invoice is Created",
-  //     htmlContent: template(invoice),
-  //   });
-  // } catch (error) {
-  //   console.log("Error happend while sending email");
-  //   console.log(error);
-  // }
+  try {
+    await sendEmail({
+      clientEmail: invoice.clientEmail,
+      subject: "Your Invoice is Created",
+      htmlContent: template(invoice),
+    });
+  } catch (error) {
+    console.log("Error happend while sending email");
+    console.log(error);
+  }
 
   res.status(201).send({
     success: true,
@@ -111,7 +111,7 @@ export const getAllInvoices = asyncErrorHandler(async (req, res, next) => {
   }
 
   const invoices = await Invoice.find(query)
-    .sort("createdAt")
+    .sort("-invoiceDate")
     .skip(skip)
     .limit(pageLimit);
 
@@ -152,7 +152,7 @@ export const updateInvoice = asyncErrorHandler(async (req, res, next) => {
   const updateData = req.body;
 
   // * validate incoming data with joi
-  const err = validateInvoice(req.body);
+  const err = validateInvoice(updateData);
   if (err) {
     return next(new CustomError(err, 400));
   }
@@ -240,19 +240,19 @@ export const markAsPaid = asyncErrorHandler(async (req, res, next) => {
   invoice.paidAt = Date.now();
   await invoice.save();
 
-  // try {
-  //   await sendEmail({
-  //     clientEmail: invoice.clientEmail,
-  //     subject: "Your Invoice is Paid",
-  //     htmlContent: paidTemplate(invoice),
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  //   return res.status(500).send({
-  //     success: false,
-  //     message: "Error happend while sending paid email notification",
-  //   });
-  // }
+  try {
+    await sendEmail({
+      clientEmail: invoice.clientEmail,
+      subject: "Your Invoice is Paid",
+      htmlContent: paidTemplate(invoice),
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error happend while sending paid email notification",
+    });
+  }
 
   res.status(200).send({
     success: true,
@@ -279,19 +279,19 @@ export const sendReminder = asyncErrorHandler(async (req, res, next) => {
     );
   }
 
-  // try {
-  //   await sendEmail({
-  //     clientEmail: invoice.clientEmail,
-  //     subject: `Invoice Reminder: Invoice ${invoice.invoiceNumber} Due Soon`,
-  //     htmlContent: reminderTemplate(invoice),
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  //   return res.status(500).send({
-  //     success: false,
-  //     message: "Error happend while sending email reminder",
-  //   });
-  // }
+  try {
+    await sendEmail({
+      clientEmail: invoice.clientEmail,
+      subject: `Invoice Reminder: Invoice ${invoice.invoiceNumber} Due Soon`,
+      htmlContent: reminderTemplate(invoice),
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error happend while sending email reminder",
+    });
+  }
 
   res.status(200).send({
     success: true,
