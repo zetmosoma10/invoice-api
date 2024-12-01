@@ -1,6 +1,7 @@
 import express from "express";
 import {
   deleteImage,
+  deleteUser,
   getCurrentUser,
   updateUser,
   uploadImage,
@@ -12,6 +13,7 @@ const router = express.Router();
 
 router.route("/get-current-user").get(auth, getCurrentUser);
 router.route("/update-user").patch(auth, updateUser);
+router.route("/delete-user").post(auth, deleteUser);
 
 router.route("/delete-profile-image").post(auth, deleteImage);
 router
