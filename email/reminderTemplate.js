@@ -8,8 +8,7 @@ function reminderTemplate(invoice) {
         <p><strong>Invoice Number:</strong> ${invoice.invoiceNumber.toUpperCase()}</p>
         <p><strong>Amount Due:</strong> R${invoice.amountDue}</p>
         <p><strong>Due Date:</strong> ${invoice.paymentDue}</p>
-        <p>Please review your invoice and complete your payment by the due date to avoid any late fees. You can view and pay your invoice by clicking the button below:</p>
-        <a href="#" style="padding: 10px 20px; margin-top: 12px ;background-color: #FF6347; color: #fff; text-decoration: none; border-radius: 5px;">View Invoice</a>
+        <p>Please review the attached invoice and complete your payment by the due date to avoid any late fees.</p>
         <p>Thank you for your prompt attention to this matter. If you have any questions, feel free to reach out to us.</p>
         <p>Best regards,<br>Web DevSolution</p>
         <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
@@ -17,7 +16,7 @@ function reminderTemplate(invoice) {
       </div>
     </body>
   </html>
-        `;
+  `;
 }
 
 export default reminderTemplate;
