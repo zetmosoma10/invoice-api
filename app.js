@@ -24,8 +24,8 @@ const corsOptions = {
   origin: process.env.FRONTEND_URL,
 };
 
-app.use(helmet());
 app.use(cors(corsOptions));
+app.use(helmet());
 app.use(express.json());
 app.use(sanitize());
 app.use(xss());
