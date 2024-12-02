@@ -20,12 +20,16 @@ const limiter = rateLimit({
     "We have receive too many request from this IP Address. Please try again in one hour.",
 });
 
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
+};
+
 app.use(helmet());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(sanitize());
 app.use(xss());
 app.use("/api", limiter);
-app.use(cors());
 app.use(compression());
 app.use("/api/user", userRouter);
 app.use("/api/invoices", invoiceRouter);
