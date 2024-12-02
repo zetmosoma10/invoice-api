@@ -6,7 +6,7 @@ function resetPasswordTemplate(user, link) {
         <h2 style="color: #FF6347;">Hello ${user.firstName},</h2>
         <p>We received a request to reset your password. If you didn't request this change, you can safely ignore this email.</p>
         <p>Otherwise, you can reset your password by clicking the button below:</p>
-        <a href="${link}" style="padding: 10px 20px; margin-top: 12px ;background-color: #FF6347; color: #fff; text-decoration: none; border-radius: 5px;">Reset Password</a>
+        <a href="${link}" style="display: inline-block;margin-top: 12px; margin-bottom: 12px;padding: 10px 20px; margin-top: 12px ;background-color: #FF6347; color: #fff; text-decoration: none; border-radius: 5px;">Reset Password</a>
         <p>Please note: This link will expire in 15 minutes for your security.</p>
         <p>Thank you for keeping your account secure.</p>
         <p>Best regards,<br>Web DevSolution</p>

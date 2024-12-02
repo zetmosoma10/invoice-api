@@ -75,21 +75,19 @@ export const forgotPassword = asyncErrorHandler(async (req, res, next) => {
   const token = user.createResetPasswordToken();
   await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/reset-password?token=${token}&id=${user._id}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}&id=${user._id}`;
 
   // * 3 -> send email token
   try {
-    // await sendEmail({
-    //   clientEmail: email,
-    //   subject: "We’ve Received Your Password Reset Request",
-    //   htmlContent: resetPasswordTemplate(user, resetUrl),
-    // });
+    await sendEmail({
+      clientEmail: email,
+      subject: "We’ve Received Your Password Reset Request",
+      htmlContent: resetPasswordTemplate(user, resetUrl),
+    });
 
     res.status(200).send({
       success: true,
-      message: "We have sent password reset link to email",
+      message: "We have sent password reset link to your email",
     });
   } catch (error) {
     next(
@@ -100,11 +98,11 @@ export const forgotPassword = asyncErrorHandler(async (req, res, next) => {
 
 export const resetPassword = asyncErrorHandler(async (req, res, next) => {
   // * 1 -> Validate token
-  const { token, id } = req.query;
+  const { token, id, password } = req.body;
 
   const user = await User.findById(id);
   if (!user) {
-    return next(new CustomError("User for given id not found", 400));
+    return next(new CustomError("User not found", 404));
   }
 
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -129,15 +127,13 @@ export const resetPassword = asyncErrorHandler(async (req, res, next) => {
   }
 
   // * 3 -> get password & validate it,
-  const { password } = req.body;
   const err = validatePassword({ password });
   if (err) {
     return next(new CustomError(err, 400));
   }
 
-  // * 4 ->  hash and update password , Invalidate token & expireTime
-  const hashedPassword = await bcrypt.hash(password, 10);
-  user.password = hashedPassword;
+  // * 4 ->  save password to db, reset db token & db token expireTime
+  user.password = password;
   user.resetPasswordTokenExpire = undefined;
   user.resetPasswordToken = undefined;
   await user.save();
@@ -145,17 +141,17 @@ export const resetPassword = asyncErrorHandler(async (req, res, next) => {
   // * 5 -> Generate jwt
   const jwt = user.generateJwt();
 
-  // try {
-  //   await sendEmail({
-  //     clientEmail: user.email,
-  //     subject: "Your Password Has Been Successfully Reset",
-  //     htmlContent: passwordSuccessTemplate(user),
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  // }
+  try {
+    await sendEmail({
+      clientEmail: user.email,
+      subject: "Your Password Has Been Successfully Reset",
+      htmlContent: passwordSuccessTemplate(user),
+    });
+  } catch (error) {
+    console.log(error);
+  }
 
-  // * 6 -> notify user
+  // * 6 -> Login user
   res.status(200).send({
     success: true,
     token: jwt,
