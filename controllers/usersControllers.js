@@ -137,13 +137,13 @@ export const uploadImage = asyncErrorHandler(async (req, res, next) => {
 });
 
 export const deleteImage = asyncErrorHandler(async (req, res, next) => {
-  const userId = req.user._id;
+  const user = req.user;
 
   try {
     await cloudinary.uploader.destroy(user.profilePicId);
 
-    const user = await User.findByIdAndUpdate(
-      userId,
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
       {
         profilePicUrl: null,
         profilePicId: null,
@@ -154,7 +154,7 @@ export const deleteImage = asyncErrorHandler(async (req, res, next) => {
     res.status(200).send({
       success: true,
       message: "Profile picture deleted successfully",
-      user,
+      user: updatedUser,
     });
   } catch (error) {
     res.status(500).send({
