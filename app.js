@@ -10,7 +10,7 @@ import catchAllRoutes from "./middlewares/catchAllRoutes.js";
 import userRouter from "./routes/userRouter.js";
 import authRouter from "./routes/authRouter.js";
 import invoiceRouter from "./routes/invoiceRouter.js";
- 
+
 const app = express();
 
 const limiter = rateLimit({
@@ -20,8 +20,8 @@ const limiter = rateLimit({
     "We have receive too many request from this IP Address. Please try again in one hour.",
 });
 
-
 app.use(cors());
+app.set("trust proxy", 1);
 app.use(helmet());
 app.use(express.json());
 app.use(sanitize());
