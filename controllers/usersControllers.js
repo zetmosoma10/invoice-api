@@ -14,6 +14,7 @@ export const getCurrentUser = asyncErrorHandler(async (req, res, next) => {
     "lastName",
     "email",
     "profilePicUrl",
+    "createdAt"
   ]);
 
   res.status(200).send({
@@ -53,6 +54,7 @@ export const updateUser = asyncErrorHandler(async (req, res, next) => {
     "_id",
     "email",
     "profilePicUrl",
+    "createdAt"
   ]);
 
   res.status(200).send({
