@@ -65,23 +65,26 @@ The server will run at: http://localhost:3000
 ## API Endpoints
 
 **Auth**
-POST /api/auth/register ----(Register new User)
-POST /api/auth/login ----(login User)
-POST /api/auth/forgotPassword ----(Forgot password)
-PATCH /api/auth/resetPassword ----(Reset password)
+
+- POST /api/auth/register ----(Register new User)
+- POST /api/auth/login ----(login User)
+- POST /api/auth/forgotPassword ----(Forgot password)
+- PATCH /api/auth/resetPassword ----(Reset password)
 
 **User**
-GET /api/user/get-current-user ----(Get loggin user)
-PATCH /api/user/update-user ----(Update User details)
-DELETE /api/user/delete-user ----(Delete User)
-POST /api/user/upload-profile-image ----(Upload user profile image)
-DELETE /api/user/delete-profile-image ----(Delete user profile image)
+
+- GET /api/user/get-current-user ----(Get loggin user)
+- PATCH /api/user/update-user ----(Update User details)
+- DELETE /api/user/delete-user ----(Delete User)
+- POST /api/user/upload-profile-image ----(Upload user profile image)
+- DELETE /api/user/delete-profile-image ----(Delete user profile image)
 
 **Invoices**
-GET /api/invoices ----(GET all invoices for logging user)
-POST /api/invoices ----(Create invoices)
-GET /api/invoices/:id ----(get invoice by id)
-PATCH /api/invoices/:id ----(update invoice)
-DELETE /api/invoices/:id ----(Delete invoice)
-PATCH /api/invoices/:id/markAsPaid ----(mark invoice as paid)
-POST /api/invoices/:id/reminder ----(send reminder invoice to client)
+
+- GET /api/invoices ----(GET all invoices for logging user)
+- POST /api/invoices ----(Create invoices)
+- GET /api/invoices/:id ----(get invoice by id)
+- PATCH /api/invoices/:id ----(update invoice)
+- DELETE /api/invoices/:id ----(Delete invoice)
+- PATCH /api/invoices/:id/markAsPaid ----(mark invoice as paid)
+- POST /api/invoices/:id/reminder ----(send reminder invoice to client)
